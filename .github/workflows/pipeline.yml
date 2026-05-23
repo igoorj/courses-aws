@@ -5,6 +5,10 @@ on:
     branches:
       - main
       - homolog
+  push:
+    branches:
+      - main
+      - homolog
 
 jobs:
   test:
