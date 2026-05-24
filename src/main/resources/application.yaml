@@ -2,7 +2,7 @@ spring:
   application:
     name: courses
   datasource:
-    url: jdbc:postgresql://localhost:5432/courses
+    url: jdbc:postgresql://localhost:5432/courses?createDatabaseIfNotExist=true
     username: admin
     password: admin123
     driver-class-name: org.postgresql.Driver
