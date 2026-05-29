@@ -59,9 +59,10 @@ def parse_controller_methods(filepath):
         # Varre as próximas 20 linhas para extrair info do corpo do método
         for body_line in lines[i : i + 20]:
             if not service_method:
-                svc = re.search(r'\w+[Ss]ervice\.(\w+)\(', body_line)
+                # Captura: courseService.method(), this.service.method(), service.method()
+                svc = re.search(r'(?:\w+\.)?(\w*[Ss]ervice)\.(\w+)\(', body_line)
                 if svc:
-                    service_method = svc.group(1)
+                    service_method = svc.group(2)
             if "ResponseEntity.created" in body_line or "HttpStatus.CREATED" in body_line:
                 returns_created = True
             if "noContent" in body_line or "NO_CONTENT" in body_line:
@@ -95,8 +96,34 @@ def _participants(ctrl, svc, repo):
     )
 
 
+def _participants_no_repo(ctrl, svc):
+    return (
+        f"    autonumber\n"
+        f"    participant C as Client\n"
+        f"    participant Ctrl as {ctrl}\n"
+        f"    participant Svc as {svc}"
+    )
+
+
 def _diagram(participants, body):
     return f"sequenceDiagram\n{participants}\n\n{body}"
+
+
+def _service_only_diagram(ctrl, svc, http, path, svc_method, returns_no_content):
+    """Controller com service mas sem repository (ex: health check)."""
+    response = "204 No Content" if returns_no_content else "200 OK"
+    p = _participants_no_repo(ctrl, svc)
+    body = (
+        f"    C->>Ctrl: {http} {path}\n"
+        f"    Ctrl->>Svc: {svc_method}()\n"
+        f"    Svc-->>Ctrl: response\n"
+        f"    Ctrl-->>C: {response}"
+    )
+    return _diagram(p, body)
+
+
+def repository_exists(entity):
+    return bool(find_java_files(f"**/repository/{entity}Repository.java"))
 
 
 def _simple_diagram(ctrl, http, path, returns_no_content):
@@ -111,15 +138,19 @@ def _simple_diagram(ctrl, http, path, returns_no_content):
     )
 
 
-def generate_sequence_diagram(ep, ctrl, svc, repo, entity, table):
+def generate_sequence_diagram(ep, ctrl, svc, repo, entity, table, has_repo):
     http = ep["http_method"]
     path = ep["path"]
     svc_method = ep["service_method"]
     has_id = "{id}" in path
 
-    # Método sem chamada de service → diagrama simplificado
+    # Sem chamada de service → apenas Client ↔ Controller
     if svc_method is None:
         return _simple_diagram(ctrl, http, path, ep["returns_no_content"])
+
+    # Com service mas sem repository → Client ↔ Controller ↔ Service
+    if not has_repo:
+        return _service_only_diagram(ctrl, svc, http, path, svc_method, ep["returns_no_content"])
 
     p = _participants(ctrl, svc, repo)
 
@@ -228,9 +259,10 @@ def build_sequence_diagrams():
         svc = f"{entity}Service"
         repo = f"{entity}Repository"
         table = entity.lower() + "s"
+        has_repo = repository_exists(entity)
 
         for ep in parse_controller_methods(filepath):
-            diagram = generate_sequence_diagram(ep, ctrl, svc, repo, entity, table)
+            diagram = generate_sequence_diagram(ep, ctrl, svc, repo, entity, table, has_repo)
             if diagram:
                 label = f"### {ep['http_method']} {ep['path']}"
                 sections.append(f"{label}\n\n```mermaid\n{diagram}\n```")
