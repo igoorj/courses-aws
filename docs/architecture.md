@@ -1,6 +1,6 @@
 # Architecture Documentation
 
-> **Last updated:** 2026-05-29 15:20 UTC by GitHub Actions
+> **Last updated:** 2026-05-29 15:24 UTC by GitHub Actions
 >
 > Seções marcadas com `AUTO_GENERATED` são atualizadas automaticamente pela pipeline a cada PR.
 > As demais seções (C4 e fluxos) devem ser mantidas manualmente.
@@ -81,6 +81,27 @@ sequenceDiagram
 
     C->>Ctrl: GET /courses
     Ctrl->>Svc: findAll()
+    Svc->>Repo: findAll()
+    Repo->>DB: SELECT * FROM courses
+    DB-->>Repo: result set
+    Repo-->>Svc: List<Course>
+    Svc-->>Ctrl: List<Course>
+    Ctrl-->>C: 200 OK · JSON array
+```
+
+### GET /courses/search
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Client
+    participant Ctrl as CourseController
+    participant Svc as CourseService
+    participant Repo as CourseRepository
+    participant DB as PostgreSQL
+
+    C->>Ctrl: GET /courses/search
+    Ctrl->>Svc: findByName()
     Svc->>Repo: findAll()
     Repo->>DB: SELECT * FROM courses
     DB-->>Repo: result set
@@ -227,6 +248,7 @@ classDiagram
 | Method | Path |
 |--------|------|
 | `GET` | `/courses` |
+| `GET` | `/courses/search` |
 | `GET` | `/courses/{id}` |
 | `POST` | `/courses` |
 | `PUT` | `/courses/{id}` |
