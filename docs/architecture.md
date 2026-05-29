@@ -1,6 +1,6 @@
 # Architecture Documentation
 
-> **Last updated:** 2026-05-29 16:50 UTC by GitHub Actions
+> **Last updated:** 2026-05-29 16:54 UTC by GitHub Actions
 >
 > Seções marcadas com `AUTO_GENERATED` são atualizadas automaticamente pela pipeline a cada PR.
 > As demais seções (C4 e fluxos) devem ser mantidas manualmente.
@@ -224,7 +224,7 @@ sequenceDiagram
     end
 ```
 
-### GET /health
+### GET /health/teste
 
 ```mermaid
 sequenceDiagram
@@ -235,7 +235,7 @@ sequenceDiagram
     participant Repo as HealthCheckRepository
     participant DB as PostgreSQL
 
-    C->>Ctrl: GET /health
+    C->>Ctrl: GET /health/teste
     Ctrl->>Svc: get()
     Svc->>Repo: findAll()
     Repo->>DB: SELECT * FROM healthchecks
@@ -274,5 +274,5 @@ classDiagram
 | `POST` | `/courses` |
 | `PUT` | `/courses/{id}` |
 | `DELETE` | `/courses/{id}` |
-| `GET` | `/health` |
+| `GET` | `/health/teste` |
 <!-- ENDPOINTS_END -->
