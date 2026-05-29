@@ -1,6 +1,6 @@
 # Architecture Documentation
 
-> **Last updated:** <!-- DATE_PLACEHOLDER --> by GitHub Actions
+> **Last updated:** 2026-05-29 15:02 UTC by GitHub Actions
 >
 > Seções marcadas com `AUTO_GENERATED` são atualizadas automaticamente pela pipeline a cada PR.
 > As demais seções (C4 e fluxos) devem ser mantidas manualmente.
@@ -115,6 +115,14 @@ sequenceDiagram
 ## Data Model
 
 <!-- AUTO_GENERATED_START -->
+```mermaid
+classDiagram
+    class Course {
+        Long id
+        String name
+        String description
+    }
+```
 <!-- AUTO_GENERATED_END -->
 
 ---
@@ -122,4 +130,8 @@ sequenceDiagram
 ## API Endpoints
 
 <!-- ENDPOINTS_START -->
+| Method | Path |
+|--------|------|
+| `GET` | `/courses` |
+| `POST` | `/courses` |
 <!-- ENDPOINTS_END -->
