@@ -4,7 +4,9 @@ import br.com.igoorj.courses.dto.CourseRequest;
 import br.com.igoorj.courses.entity.Course;
 import br.com.igoorj.courses.repository.CourseRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -18,10 +20,27 @@ public class CourseService {
         return courseRepository.findAll();
     }
 
+    public Course findById(Long id) {
+        return courseRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
+    }
+
     public Course create(CourseRequest request) {
         var course = new Course();
         course.setName(request.name());
         course.setDescription(request.description());
         return courseRepository.save(course);
+    }
+
+    public Course update(Long id, CourseRequest request) {
+        Course course = findById(id);
+        course.setName(request.name());
+        course.setDescription(request.description());
+        return courseRepository.save(course);
+    }
+
+    public void delete(Long id) {
+        findById(id);
+        courseRepository.deleteById(id);
     }
 }
