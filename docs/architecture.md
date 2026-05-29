@@ -1,6 +1,6 @@
 # Architecture Documentation
 
-> **Last updated:** 2026-05-29 15:02 UTC by GitHub Actions
+> **Last updated:** 2026-05-29 15:08 UTC by GitHub Actions
 >
 > Seções marcadas com `AUTO_GENERATED` são atualizadas automaticamente pela pipeline a cada PR.
 > As demais seções (C4 e fluxos) devem ser mantidas manualmente.
@@ -133,5 +133,8 @@ classDiagram
 | Method | Path |
 |--------|------|
 | `GET` | `/courses` |
+| `GET` | `/courses/{id}` |
 | `POST` | `/courses` |
+| `PUT` | `/courses/{id}` |
+| `DELETE` | `/courses/{id}` |
 <!-- ENDPOINTS_END -->
