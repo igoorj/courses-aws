@@ -1,6 +1,6 @@
 # Architecture Documentation
 
-> **Last updated:** 2026-05-29 15:08 UTC by GitHub Actions
+> **Last updated:** 2026-05-29 15:20 UTC by GitHub Actions
 >
 > Seções marcadas com `AUTO_GENERATED` são atualizadas automaticamente pela pipeline a cada PR.
 > As demais seções (C4 e fluxos) devem ser mantidas manualmente.
@@ -67,29 +67,8 @@ C4Component
 
 ## API Flows
 
-### POST /courses — Criar um curso
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant C as Client
-    participant Ctrl as CourseController
-    participant Svc as CourseService
-    participant Repo as CourseRepository
-    participant DB as PostgreSQL
-
-    C->>Ctrl: POST /courses {name, description}
-    Ctrl->>Svc: create(CourseRequest)
-    Svc->>Svc: instancia entidade Course
-    Svc->>Repo: save(course)
-    Repo->>DB: INSERT INTO courses
-    DB-->>Repo: linha persistida com id gerado
-    Repo-->>Svc: Course
-    Svc-->>Ctrl: Course
-    Ctrl-->>C: 201 Created · Location: /courses/{id}
-```
-
-### GET /courses — Listar todos os cursos
+<!-- FLOWS_START -->
+### GET /courses
 
 ```mermaid
 sequenceDiagram
@@ -109,6 +88,121 @@ sequenceDiagram
     Svc-->>Ctrl: List<Course>
     Ctrl-->>C: 200 OK · JSON array
 ```
+
+### GET /courses/{id}
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Client
+    participant Ctrl as CourseController
+    participant Svc as CourseService
+    participant Repo as CourseRepository
+    participant DB as PostgreSQL
+
+    C->>Ctrl: GET /courses/{id}
+    Ctrl->>Svc: findById(id)
+    Svc->>Repo: findById(id)
+    Repo->>DB: SELECT * FROM courses WHERE id = ?
+    DB-->>Repo: result
+
+    alt course encontrado
+        Repo-->>Svc: Optional[Course]
+        Svc-->>Ctrl: Course
+        Ctrl-->>C: 200 OK · Course JSON
+    else não encontrado
+        Repo-->>Svc: Optional.empty()
+        Svc-->>Ctrl: ResponseStatusException(404)
+        Ctrl-->>C: 404 Not Found
+    end
+```
+
+### POST /courses
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Client
+    participant Ctrl as CourseController
+    participant Svc as CourseService
+    participant Repo as CourseRepository
+    participant DB as PostgreSQL
+
+    C->>Ctrl: POST /courses {...}
+    Ctrl->>Svc: create(request)
+    Svc->>Svc: instancia Course
+    Svc->>Repo: save(course)
+    Repo->>DB: INSERT INTO courses
+    DB-->>Repo: linha persistida com id gerado
+    Repo-->>Svc: Course
+    Svc-->>Ctrl: Course
+    Ctrl-->>C: 201 Created · Location: /courses/{id}
+```
+
+### PUT /courses/{id}
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Client
+    participant Ctrl as CourseController
+    participant Svc as CourseService
+    participant Repo as CourseRepository
+    participant DB as PostgreSQL
+
+    C->>Ctrl: PUT /courses/{id} {...}
+    Ctrl->>Svc: update(id, request)
+    Svc->>Repo: findById(id)
+    Repo->>DB: SELECT * FROM courses WHERE id = ?
+    DB-->>Repo: result
+
+    alt course encontrado
+        Repo-->>Svc: Optional[Course]
+        Svc->>Svc: aplica alterações
+        Svc->>Repo: save(course)
+        Repo->>DB: UPDATE courses SET ...
+        DB-->>Repo: linha atualizada
+        Repo-->>Svc: Course
+        Svc-->>Ctrl: Course
+        Ctrl-->>C: 200 OK · Course JSON atualizado
+    else não encontrado
+        Repo-->>Svc: Optional.empty()
+        Svc-->>Ctrl: ResponseStatusException(404)
+        Ctrl-->>C: 404 Not Found
+    end
+```
+
+### DELETE /courses/{id}
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Client
+    participant Ctrl as CourseController
+    participant Svc as CourseService
+    participant Repo as CourseRepository
+    participant DB as PostgreSQL
+
+    C->>Ctrl: DELETE /courses/{id}
+    Ctrl->>Svc: delete(id)
+    Svc->>Repo: findById(id)
+    Repo->>DB: SELECT * FROM courses WHERE id = ?
+    DB-->>Repo: result
+
+    alt course encontrado
+        Repo-->>Svc: Optional[Course]
+        Svc->>Repo: deleteById(id)
+        Repo->>DB: DELETE FROM courses WHERE id = ?
+        DB-->>Repo: ok
+        Svc-->>Ctrl: void
+        Ctrl-->>C: 204 No Content
+    else não encontrado
+        Repo-->>Svc: Optional.empty()
+        Svc-->>Ctrl: ResponseStatusException(404)
+        Ctrl-->>C: 404 Not Found
+    end
+```
+<!-- FLOWS_END -->
 
 ---
 
