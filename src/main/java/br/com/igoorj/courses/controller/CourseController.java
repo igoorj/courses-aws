@@ -22,6 +22,11 @@ public class CourseController {
         return ResponseEntity.ok(courseService.findAll());
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Course> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(courseService.findById(id));
+    }
+
     @PostMapping
     public ResponseEntity<Course> create(@RequestBody CourseRequest request) {
         Course created = courseService.create(request);
@@ -30,5 +35,16 @@ public class CourseController {
                 .buildAndExpand(created.getId())
                 .toUri();
         return ResponseEntity.created(location).body(created);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Course> update(@PathVariable Long id, @RequestBody CourseRequest request) {
+        return ResponseEntity.ok(courseService.update(id, request));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        courseService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }
