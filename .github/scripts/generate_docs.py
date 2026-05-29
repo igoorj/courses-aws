@@ -71,7 +71,7 @@ def parse_controller_methods(filepath):
             {
                 "http_method": http_method,
                 "path": base_path + path_suffix,
-                "service_method": service_method or http_method.lower(),
+                "service_method": service_method,  # None = controller responde direto, sem service
                 "returns_created": returns_created,
                 "returns_no_content": returns_no_content,
             }
@@ -99,11 +99,28 @@ def _diagram(participants, body):
     return f"sequenceDiagram\n{participants}\n\n{body}"
 
 
+def _simple_diagram(ctrl, http, path, returns_no_content):
+    response = "204 No Content" if returns_no_content else "200 OK"
+    return (
+        f"sequenceDiagram\n"
+        f"    autonumber\n"
+        f"    participant C as Client\n"
+        f"    participant Ctrl as {ctrl}\n\n"
+        f"    C->>Ctrl: {http} {path}\n"
+        f"    Ctrl-->>C: {response}"
+    )
+
+
 def generate_sequence_diagram(ep, ctrl, svc, repo, entity, table):
     http = ep["http_method"]
     path = ep["path"]
     svc_method = ep["service_method"]
     has_id = "{id}" in path
+
+    # Método sem chamada de service → diagrama simplificado
+    if svc_method is None:
+        return _simple_diagram(ctrl, http, path, ep["returns_no_content"])
+
     p = _participants(ctrl, svc, repo)
 
     if http == "GET" and not has_id:
