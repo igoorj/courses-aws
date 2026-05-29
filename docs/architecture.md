@@ -110,6 +110,98 @@ sequenceDiagram
     Ctrl-->>C: 200 OK · JSON array
 ```
 
+### GET /courses/{id} — Buscar curso por id
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Client
+    participant Ctrl as CourseController
+    participant Svc as CourseService
+    participant Repo as CourseRepository
+    participant DB as PostgreSQL
+
+    C->>Ctrl: GET /courses/{id}
+    Ctrl->>Svc: findById(id)
+    Svc->>Repo: findById(id)
+    Repo->>DB: SELECT * FROM courses WHERE id = ?
+    DB-->>Repo: result
+
+    alt curso encontrado
+        Repo-->>Svc: Optional[Course]
+        Svc-->>Ctrl: Course
+        Ctrl-->>C: 200 OK · Course JSON
+    else não encontrado
+        Repo-->>Svc: Optional.empty()
+        Svc-->>Ctrl: ResponseStatusException(404)
+        Ctrl-->>C: 404 Not Found
+    end
+```
+
+### PUT /courses/{id} — Atualizar um curso
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Client
+    participant Ctrl as CourseController
+    participant Svc as CourseService
+    participant Repo as CourseRepository
+    participant DB as PostgreSQL
+
+    C->>Ctrl: PUT /courses/{id} {name, description}
+    Ctrl->>Svc: update(id, CourseRequest)
+    Svc->>Repo: findById(id)
+    Repo->>DB: SELECT * FROM courses WHERE id = ?
+    DB-->>Repo: result
+
+    alt curso encontrado
+        Repo-->>Svc: Optional[Course]
+        Svc->>Svc: aplica name e description
+        Svc->>Repo: save(course)
+        Repo->>DB: UPDATE courses SET ...
+        DB-->>Repo: linha atualizada
+        Repo-->>Svc: Course
+        Svc-->>Ctrl: Course
+        Ctrl-->>C: 200 OK · Course JSON atualizado
+    else não encontrado
+        Repo-->>Svc: Optional.empty()
+        Svc-->>Ctrl: ResponseStatusException(404)
+        Ctrl-->>C: 404 Not Found
+    end
+```
+
+### DELETE /courses/{id} — Remover um curso
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Client
+    participant Ctrl as CourseController
+    participant Svc as CourseService
+    participant Repo as CourseRepository
+    participant DB as PostgreSQL
+
+    C->>Ctrl: DELETE /courses/{id}
+    Ctrl->>Svc: delete(id)
+    Svc->>Repo: findById(id)
+    Repo->>DB: SELECT * FROM courses WHERE id = ?
+    DB-->>Repo: result
+
+    alt curso encontrado
+        Repo-->>Svc: Optional[Course]
+        Svc->>Repo: deleteById(id)
+        Repo->>DB: DELETE FROM courses WHERE id = ?
+        DB-->>Repo: ok
+        Svc-->>Ctrl: void
+        Ctrl-->>C: 204 No Content
+    else não encontrado
+        Repo-->>Svc: Optional.empty()
+        Svc-->>Ctrl: ResponseStatusException(404)
+        Ctrl-->>C: 404 Not Found
+    end
+```
+
 ---
 
 ## Data Model
