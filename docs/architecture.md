@@ -1,6 +1,6 @@
 # Architecture Documentation
 
-> **Last updated:** 2026-05-29 16:54 UTC by GitHub Actions
+> **Last updated:** 2026-05-29 17:00 UTC by GitHub Actions
 >
 > Seções marcadas com `AUTO_GENERATED` são atualizadas automaticamente pela pipeline a cada PR.
 > As demais seções (C4 e fluxos) devem ser mantidas manualmente.
@@ -231,18 +231,9 @@ sequenceDiagram
     autonumber
     participant C as Client
     participant Ctrl as HealthCheckController
-    participant Svc as HealthCheckService
-    participant Repo as HealthCheckRepository
-    participant DB as PostgreSQL
 
     C->>Ctrl: GET /health/teste
-    Ctrl->>Svc: get()
-    Svc->>Repo: findAll()
-    Repo->>DB: SELECT * FROM healthchecks
-    DB-->>Repo: result set
-    Repo-->>Svc: List<HealthCheck>
-    Svc-->>Ctrl: List<HealthCheck>
-    Ctrl-->>C: 200 OK · JSON array
+    Ctrl-->>C: 200 OK
 ```
 <!-- FLOWS_END -->
 
